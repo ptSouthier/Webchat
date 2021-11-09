@@ -76,7 +76,7 @@
       updateNickname(nickname);
     };
 
-    const handleSentMessage = (e) => {
+    const handleSendMessage = (e) => {
       e.preventDefault();
       const messageBox = document.querySelector('#message-box');
       const chatMessage = messageBox.value;
@@ -86,7 +86,7 @@
     };
 
     nicknameForm.addEventListener('submit', handleNicknameChange);
-    messageForm.addEventListener('submit', handleSentMessage);
+    messageForm.addEventListener('submit', handleSendMessage);
 
 
     socket.on('initialNickname', (socketId) => {
