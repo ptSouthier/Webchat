@@ -21,8 +21,9 @@ io.on('connection', (socket) => {
 
   socket.emit('initialNickname', (socket.id));
 
-  socket.on('message', ({ chatMessage, nickname }) => {
-    io.emit('sendMessage', { chatMessage, nickname });
+  socket.on('message', async ({ chatMessage, nickname, timestamp }) => {
+    await chatController.createMessage({ chatMessage, nickname, timestamp });
+    io.emit('sendMessage', { chatMessage, nickname, timestamp });
   });
 });
 

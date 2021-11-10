@@ -60,10 +60,9 @@
       return timestamp;
     };
 
-    const createMessage = ({ chatMessage, nickname }) => {
+    const createMessage = ({ chatMessage, nickname, timestamp }) => {
       const chatBox = document.querySelector('#chat-box');
       const chatItem = document.createElement('li');
-      const timestamp = getTimestamp();
       const message = `${timestamp} - ${nickname}: ${chatMessage}`;
       chatItem.innerText = message;
       chatBox.appendChild(chatItem);
@@ -81,7 +80,8 @@
       e.preventDefault();
       const messageBox = document.querySelector('#message-box');
       const chatMessage = messageBox.value;
-      socket.emit('message', ({ chatMessage, nickname }));
+      const timestamp = getTimestamp();
+      socket.emit('message', ({ chatMessage, nickname, timestamp }));
       messageBox.value = '';
     };
 
@@ -95,7 +95,7 @@
       updateNickname(nickname);
     });
 
-    socket.on('sendMessage', ({ chatMessage, nickname }) => createMessage({ chatMessage, nickname }));
+    socket.on('sendMessage', ({ chatMessage, nickname }) => createMessage({ chatMessage, nickname, timestamp }));
   </script>
 
 </body>
