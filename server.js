@@ -1,10 +1,11 @@
 const app = require('express')();
 const http = require('http').createServer(app);
 const cors = require('cors');
+const moment = require('moment');
 
 const io = require('socket.io')(http, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000/',
     method: ['GET', 'POST'],
   },
 });
@@ -21,10 +22,17 @@ io.on('connection', (socket) => {
 
   socket.emit('initialNickname', (socket.id));
 
-  socket.on('message', async ({ chatMessage, nickname, timestamp }) => {
-    await chatController.createMessage({ chatMessage, nickname, timestamp });
-    io.emit('sendMessage', { chatMessage, nickname, timestamp });
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const timestamp = moment().format('DD-MM-YYYY hh:mm:ss A');
+    const message = `${timestamp} - ${nickname}: ${chatMessage}`;     
+    await chatController.createMessage(message);
+    io.emit('message', (message));
+    console.log(chatMessage, nickname, timestamp);
   });
+
+  // socket.on('disconnect', () => {
+  //   socket.broadcast.emit('message', 'Poxa, alguém deixou o chat :/');
+  // });
 });
 
 app.get('/', chatController.getHistory);
