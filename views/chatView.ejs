@@ -29,16 +29,17 @@
   <ul id="chat-box"></ul>
   
   <form id="message-form">
-    <textarea
-        required
-        id="message-box"
-        data-testid="message-box"
-        placeholder="Write a message"
-      ></textarea>
-      <button type="submit" id="send-button" data-testid="send-button">SEND</button>
+    <input
+      required
+      id="message-box"
+      data-testid="message-box"
+      placeholder="Write a message"
+    />
+    <button type="submit" id="send-button" data-testid="send-button">SEND</button>
     </form>
 
   <script>
+    window.onbeforeunload = () => socket.disconnect();
     const socket = io();
     const nicknameForm = document.querySelector('#nickname-form');
     const messageForm = document.querySelector('#message-form');
@@ -49,21 +50,10 @@
       nicknameElement.innerText = nickname;
     };
 
-    const getTimestamp = () => {
-      const actualDate = new Date();
-      const day = actualDate.getDate();
-      const month = (actualDate.getMonth() + 1);
-      const year = actualDate.getFullYear();
-      const hours = actualDate.getHours();
-      const minutes = actualDate.getMinutes();
-      const timestamp = `${day}-${month}-${year} ${hours}:${minutes}`;
-      return timestamp;
-    };
-
-    const createMessage = ({ chatMessage, nickname, timestamp }) => {
+    const createMessage = (message) => {
       const chatBox = document.querySelector('#chat-box');
       const chatItem = document.createElement('li');
-      const message = `${timestamp} - ${nickname}: ${chatMessage}`;
+      chatItem.setAttribute('data-testid', 'message');
       chatItem.innerText = message;
       chatBox.appendChild(chatItem);
     };
@@ -80,8 +70,7 @@
       e.preventDefault();
       const messageBox = document.querySelector('#message-box');
       const chatMessage = messageBox.value;
-      const timestamp = getTimestamp();
-      socket.emit('message', ({ chatMessage, nickname, timestamp }));
+      socket.emit('message', ({ chatMessage, nickname }));
       messageBox.value = '';
     };
 
@@ -95,7 +84,7 @@
       updateNickname(nickname);
     });
 
-    socket.on('sendMessage', ({ chatMessage, nickname }) => createMessage({ chatMessage, nickname, timestamp }));
+    socket.on('message', (message) => createMessage(message));
   </script>
 
 </body>
