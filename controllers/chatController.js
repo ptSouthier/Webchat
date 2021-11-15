@@ -2,11 +2,8 @@ const chatModel = require('../models/chatModel');
 
 const HTTP_OK = 200;
 
-const createMessage = async (req, res) => {
-  const { chatMessage, nickname, timestamp } = req.body;
-  const sendMessage = await chatModel.createMessage({ chatMessage, nickname, timestamp });
-
-  res.status(HTTP_OK).render('chatView', sendMessage);
+const createMessage = async ({ chatMessage, nickname, timestamp }) => {
+  await chatModel.createMessage({ chatMessage, nickname, timestamp });
 };
 
 const getHistory = async (_req, res) => {
