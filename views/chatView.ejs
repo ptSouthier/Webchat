@@ -11,7 +11,7 @@
 <body>
 
   <div id="user-container">
-    <p id="online-user" data-testid="online-user"> <%= nickname %> </p>
+    <p id="online-user" data-testid="online-user"></p>
     <form id="nickname-form">
       <input
         required
@@ -27,7 +27,11 @@
     </form>
   </div>
 
-  <ul id="chat-box"></ul>
+  <ul id="chat-box">
+    <% history.forEach(({ message, nickname, timestamp }) => { %>
+      <li data-testid="message"><%= `${timestamp} - ${nickname}: ${message}` %></li>
+    <% }) %>
+  </ul>
   
   <form id="message-form">
     <input
@@ -41,7 +45,6 @@
     </form>
 
   <script>
-    window.onbeforeunload = () => socket.disconnect();
     const socket = io();
     const nicknameForm = document.querySelector('#nickname-form');
     const messageForm = document.querySelector('#message-form');
