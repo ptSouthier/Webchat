@@ -51,7 +51,7 @@
     let nickname = 'nickname';
 
     const updateNickname = (nickname) => {
-      const nicknameElement = document.querySelector(`#${socket.id}`);
+      const nicknameElement = document.getElementById(`${socket.id}`);
       const previousNickname = nicknameElement.innerText;
       nicknameElement.innerText = nickname;
       socket.emit('updateUser', nickname);
@@ -89,40 +89,24 @@
     socket.on('onlineList', (users, socketID) => {
       const usersList = document.querySelector('#online-users');
       usersList.innerHTML = '';
+      console.log('SOCKET: ', socket);
       Object.entries(users).forEach((user) => {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'online-user');
         li.setAttribute('id', `${user[0]}`);
         li.innerText = `${user[1]}`;
-        if (user[0] === socketID) {
+        if (user[0] === socket.id || user[1] === socket.id.substring(0, socket.id.length - 4)) {
+          nickname = user[1];
           return usersList.prepend(li);
         }
         return usersList.appendChild(li);
       });
-      // socket.emit('onlineList');
     });
-
-    // socket.on('arrangeUser', (socketID) => {
-    //   const usersList = document.querySelector('#online-users');
-    //   const getUser = document.querySelector(`#${socketID}`);
-    //   const userNick = getUser.innerText;
-    //   getUser.remove();
-    //   const li = document.createElement('li');
-    //   li.setAttribute('data-testid', 'online-user');
-    //   li.setAttribute('id', `${socketID}`);
-    //   li.innerText = userNick;
-    //   usersList.prepend(li);
-    // });
 
     socket.on('updateUser', (socketID, nickname) => {
       const user = document.querySelector(`#${socketID}`);
       user.innerText = nickname;
     });
-
-    // socket.on('offline', (socketID) => {
-    //   const user = document.querySelector(`#${socketID}`);
-    //   user.remove();
-    // });
   </script>
 
 </body>
