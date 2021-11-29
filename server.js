@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
   socket.on('message', async ({ chatMessage, nickname }) => {
     const timestamp = moment().format('DD-MM-YYYY hh:mm:ss A');
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;     
-    await chatController.createMessage(message);
+    await chatController.createMessage({ chatMessage, nickname, timestamp });
     io.emit('message', (message));
   });
 
