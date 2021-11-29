@@ -27,12 +27,11 @@ io.on('connection', (socket) => {
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;     
     await chatController.createMessage(message);
     io.emit('message', (message));
-    console.log(chatMessage, nickname, timestamp);
   });
 
-  // socket.on('disconnect', () => {
-  //   socket.broadcast.emit('message', 'Poxa, alguém deixou o chat :/');
-  // });
+  socket.on('disconnect', () => {
+    socket.broadcast.emit('message', 'Poxa, alguém deixou o chat :/');
+  });
 });
 
 app.get('/', chatController.getHistory);
