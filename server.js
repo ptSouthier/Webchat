@@ -10,6 +10,7 @@ const io = require('socket.io')(http, {
   },
 });
 
+const usersList = {};
 const PORT = 3000;
 const chatController = require('./controllers/chatController');
 
@@ -18,9 +19,19 @@ app.set('views', './views');
 app.use(cors());
 
 io.on('connection', (socket) => {
-  console.log(`O Cliente ${socket.id} se conectou`);
+  usersList[socket.id] = socket.id.substring(0, socket.id.length - 4);
 
-  socket.emit('initialNickname', (socket.id));
+  io.emit('onlineList', usersList, socket.id);
+
+  // socket.on('onlineList', () => {
+  //   socket.emit('arrangeUser', socket.id);
+  // });
+
+  socket.on('updateUser', (nickname) => {
+    usersList[socket.id] = nickname;
+    io.emit('updateUser', socket.id, nickname);
+    io.emit('onlineList', usersList, socket.id);
+  });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const timestamp = moment().format('DD-MM-YYYY hh:mm:ss A');
@@ -30,10 +41,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    socket.broadcast.emit('message', 'Poxa, alguém deixou o chat :/');
+    delete usersList[socket.id];
+    // socket.broadcast.emit('offline', socket.id);
+    io.emit('onlineList', usersList, socket.id);
   });
 });
 
 app.get('/', chatController.getHistory);
 
-http.listen(PORT, () => console.log(`App runing on port ${PORT}`));
+http.listen(PORT, () => console.log(`App running on port ${PORT}`));
