@@ -11,10 +11,10 @@
 <body>
 
   <div id="user-container">
-    <p id="online-user" data-testid="online-user"> <%= nickname %> </p>
     <form id="nickname-form">
       <input
         required
+        autocomplete="off"
         minlength="3"
         maxlength="16"
         type="text"
@@ -24,13 +24,19 @@
       />
       <button type="submit" id="nickname-button" data-testid="nickname-button">CONFIRM</button>
     </form>
+    <ul id="online-users"></ul>
   </div>
 
-  <ul id="chat-box"></ul>
+  <ul id="chat-box">
+    <% history.forEach(({ message, nickname, timestamp }) => { %>
+      <li data-testid="message"><%= `${timestamp} - ${nickname}: ${message}` %></li>
+    <% }) %>
+  </ul>
   
   <form id="message-form">
     <input
       required
+      autocomplete="off"
       id="message-box"
       data-testid="message-box"
       placeholder="Write a message"
@@ -39,15 +45,16 @@
     </form>
 
   <script>
-    window.onbeforeunload = () => socket.disconnect();
     const socket = io();
     const nicknameForm = document.querySelector('#nickname-form');
     const messageForm = document.querySelector('#message-form');
     let nickname = 'nickname';
 
     const updateNickname = (nickname) => {
-      const nicknameElement = document.querySelector('#online-user');
+      const nicknameElement = document.getElementById(`${socket.id}`);
+      const previousNickname = nicknameElement.innerText;
       nicknameElement.innerText = nickname;
+      socket.emit('updateUser', nickname);
     };
 
     const createMessage = (message) => {
@@ -77,14 +84,29 @@
     nicknameForm.addEventListener('submit', handleNicknameChange);
     messageForm.addEventListener('submit', handleSendMessage);
 
+    socket.on('message', (message) => createMessage(message));
 
-    socket.on('initialNickname', (socketId) => {
-      const initialNickname = socketId.substring(0, socketId.length - 4);
-      nickname = initialNickname;
-      updateNickname(nickname);
+    socket.on('onlineList', (users, socketID) => {
+      const usersList = document.querySelector('#online-users');
+      usersList.innerHTML = '';
+      console.log('SOCKET: ', socket);
+      Object.entries(users).forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.setAttribute('id', `${user[0]}`);
+        li.innerText = `${user[1]}`;
+        if (user[0] === socket.id || user[1] === socket.id.substring(0, socket.id.length - 4)) {
+          nickname = user[1];
+          return usersList.prepend(li);
+        }
+        return usersList.appendChild(li);
+      });
     });
 
-    socket.on('message', (message) => createMessage(message));
+    socket.on('updateUser', (socketID, nickname) => {
+      const user = document.querySelector(`#${socketID}`);
+      user.innerText = nickname;
+    });
   </script>
 
 </body>
